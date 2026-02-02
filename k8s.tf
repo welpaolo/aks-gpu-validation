@@ -12,7 +12,7 @@ resource "azurerm_kubernetes_cluster" "prod-k8s" {
   name                = "TestAKSCluster"
   resource_group_name = azurerm_resource_group.rg.name
   dns_prefix          = "testaksclusterprefix"
-  kubernetes_version  = "1.29.9"
+  kubernetes_version  = "1.34.0"
 
   identity {
     type = "SystemAssigned"
@@ -44,5 +44,17 @@ resource "azurerm_kubernetes_cluster" "prod-k8s" {
     network_plugin = "kubenet"
     service_cidr   = "10.1.0.0/16"      # Ensure this does not overlap with any subnets
     dns_service_ip = "10.1.0.10"        # Hardcoded DNS service IP
+  }
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "arm64" {
+  name                  = "arm64pool"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.prod-k8s.id
+  vm_size               = "Standard_D2ps_v5"  # ARM64 VM size
+  node_count            = 1
+  vnet_subnet_id        = azurerm_subnet.infrastructure.id
+
+  tags = {
+    Architecture = "ARM64"
   }
 }
